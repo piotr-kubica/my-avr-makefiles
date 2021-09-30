@@ -1,0 +1,37 @@
+MCU=attiny85
+# F_CPU=1200000
+# 1 Mhz
+F_CPU=1000000UL
+CC=avr-gcc
+OBJCOPY=avr-objcopy
+BAUD=9600UL
+CFLAGS=-std=c99 -Wall -g -Os -mmcu=${MCU} -DF_CPU=${F_CPU} -DBAUD=${BAUD} -I.
+TARGET=main
+SRCS=main.c
+PROGRAMMER=usbasp
+
+# FUSES      = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m   # 1mhz
+# FUSES      = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:
+
+LFUSE = 0x62
+HFUSE = 0xdf
+# EFUSE or 0x00  or 0xff
+EFUSE = 0xff  
+
+## Generic 
+FUSE_STRING = lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):
+
+
+all:
+	${CC} ${CFLAGS} -o ${TARGET}.bin ${SRCS}
+	${OBJCOPY} -j .text -j .data -O ihex ${TARGET}.bin ${TARGET}.hex
+
+flash:
+	avrdude -v -p ${MCU} -c ${PROGRAMMER} -U flash:w:${TARGET}.hex:i -F -P /dev/bus/usb/001/020 -B4
+
+fuses: 
+	avrdude -v -p ${MCU} -c ${PROGRAMMER} -U ${FUSE_STRING} -F -P /dev/bus/usb/001/020 -B4
+
+clean:
+	rm -f *.bin *.hex *.o
+	
