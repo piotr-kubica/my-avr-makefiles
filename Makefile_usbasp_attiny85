@@ -21,6 +21,8 @@ EFUSE = 0xff
 ## Generic 
 FUSE_STRING = lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):
 
+# NOTE
+# device /dev/bus/usb/001/020 take from lsusb
 
 all:
 	${CC} ${CFLAGS} -o ${TARGET}.bin ${SRCS}
